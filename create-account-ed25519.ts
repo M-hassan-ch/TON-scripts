@@ -1,7 +1,8 @@
-import { mnemonicNew, mnemonicToSeed, getED25519MasterKeyFromSeed, deriveED25519HardenedKey, keyPairFromSeed } from '@ton/crypto';
-import { TonClient, WalletContractV4 } from '@ton/ton';
+import { mnemonicNew, mnemonicToSeed, getED25519MasterKeyFromSeed, deriveED25519HardenedKey, keyPairFromSeed, mnemonicToPrivateKey } from '@ton/crypto';
+import { WalletContractV5R1 } from '@ton/ton';
+import { getClient } from './utils/get-client';
+import { getWalletContract } from './utils/get-wallet';
 
-// Interface for wallet details
 interface WalletDetails {
     derivationPath: string;
     publicKey: string;
@@ -10,10 +11,31 @@ interface WalletDetails {
     mainnetAddress: string;
 }
 
-const client = new TonClient({
-    endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC',
-});
+const client = await getClient('mainnet');
 
+async function generateKeyPairFromSeed(seeds: string[]) {
+    let keyPair = await mnemonicToPrivateKey(seeds);
+    let wallet = await getWalletContract(client, keyPair.publicKey);
+
+    const testnetAddress = wallet.address?.toString({
+        testOnly: true,
+        bounceable: false
+    });
+
+    const mainnetAddress = wallet.address.toString({
+        testOnly: false,
+        bounceable: false
+    });
+
+    console.log("Master wallet: ", {
+        derivationPath: `m/44'/607'/0'/0/${0}`,
+        publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
+        privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
+        testnetAddress,
+        mainnetAddress
+    }, '\n');
+    return keyPair;
+}
 
 async function createTonkeeperWallets(count: number = 3): Promise<{ mnemonic: string; wallets: WalletDetails[] }> {
     try {
@@ -22,32 +44,35 @@ async function createTonkeeperWallets(count: number = 3): Promise<{ mnemonic: st
         const mnemonicString = mnemonic.join(' ');
         const seed = await mnemonicToSeed(mnemonic, "mnemonic");
         const masterKey = await getED25519MasterKeyFromSeed(seed);
-
         const wallets: WalletDetails[] = [];
+
+        await generateKeyPairFromSeed(mnemonic);
+
         for (let index = 0; index < count; index++) {
             const derivedKey = await deriveED25519HardenedKey(masterKey, index);
             const keyPair = keyPairFromSeed(derivedKey.key);
 
-            const wallet = WalletContractV4.create({
+            // Create wallet contract
+            let wallet = WalletContractV5R1.create({
                 publicKey: keyPair.publicKey,
                 workchain: 0,
             });
             let contract = client.open(wallet);
-            
+
             const testnetAddress = wallet.address?.toString({
                 testOnly: true,
                 bounceable: false
             });
-    
+
             const mainnetAddress = contract.address.toString({
                 testOnly: false,
                 bounceable: false
             });
-        
+
             wallets.push({
                 derivationPath: `m/44'/607'/0'/0/${index}`,
                 publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
-                privateKey: Buffer.from(keyPair.secretKey).slice(0, 32).toString('hex'),
+                privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
                 testnetAddress,
                 mainnetAddress
             });
@@ -65,7 +90,7 @@ async function createTonkeeperWallets(count: number = 3): Promise<{ mnemonic: st
 
 async function main() {
     try {
-        const { mnemonic, wallets } = await createTonkeeperWallets(3);
+        const { mnemonic, wallets } = await createTonkeeperWallets(1);
 
         console.log('Generated Mnemonic:', mnemonic);
         console.log('Generated Wallets:');
