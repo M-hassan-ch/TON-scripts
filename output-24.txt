@@ -1,0 +1,17 @@
+{
+  mnemonic: 'olympic comfort diamond cute pool cactus cement stay exchange few flight series medal vibrant arrange advice interest help camp welcome brass garage theory gas'
+}
+
+Wallet 0:
+Derivation Path: m/44'/607'/0'/0/0
+Public Key: 92f8dcc3f342e896cd0c5880c57e2349e919681ebbb9b95e5077a3758df09736
+Private Key: 29d5d6d4d90f7ad8b958033d9f3d0515b627db04eca7f97975d7b71865c922e092f8dcc3f342e896cd0c5880c57e2349e919681ebbb9b95e5077a3758df09736
+Wallet Address: kQD6EAeaWm84GvAjO0sh8MUNNocbnyjihDmpmD7Pael8-2dN
+User Friendly Address: 0QD6EAeaWm84GvAjO0sh8MUNNocbnyjihDmpmD7Pael8-zqI
+
+Wallet 1:
+Derivation Path: m/44'/607'/0'/0/1
+Public Key: 36e598b903be57b666025f5c02a4965aee93bb4fac8207b4dd0e1428f8665bef
+Private Key: 7eaa3cc4e967662a0066b42b25aa0b7adc55f637c48cc4ad3a85b10111f15b4936e598b903be57b666025f5c02a4965aee93bb4fac8207b4dd0e1428f8665bef
+Wallet Address: kQBJlcXb3w1tt89KcXhosvruyrfbBOxJFOenNcr4UCCdKYZ0
+User Friendly Address: 0QBJlcXb3w1tt89KcXhosvruyrfbBOxJFOenNcr4UCCdKdux
