@@ -1,0 +1,7 @@
+Master wallet:  {
+  derivationPath: "m/44'/607'/0'/0/0",
+  publicKey: '6ac6a09071f1d965223962f40c3cc7541fd4aff8187f8bf66f5c3e0ae3b0c613',
+  privateKey: '66c9a4117197bc163db6d3c8d79ae1a5196a912ead6c7c610f1451ebe4ab5b1c6ac6a09071f1d965223962f40c3cc7541fd4aff8187f8bf66f5c3e0ae3b0c613',
+  testnetAddress: '0QDwWxN4IAYh0wL0hC8pVmQ2JE23xTb5rW7fss7oNPZ74rH_',
+  mainnetAddress: 'UQDwWxN4IAYh0wL0hC8pVmQ2JE23xTb5rW7fss7oNPZ74gp1'
+} 
