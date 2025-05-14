@@ -1,8 +1,11 @@
-import { beginCell, Address, toNano, internal, SendMode, JettonMaster } from '@ton/ton';
+import { beginCell, Address, toNano, internal, SendMode, JettonMaster, external } from '@ton/ton';
 import { mnemonicToPrivateKey } from '@ton/crypto';
 import * as fs from 'fs';
 import { getClient } from './utils/get-client';
 import { getWalletContract } from './utils/get-wallet';
+import { ta } from './utils/tonapi-client';
+import { getTransactionDetails } from './utils/get-transaction';
+import { delay } from './utils/delay';
 
 async function createJetton() {
   const client = await getClient('testnet');
@@ -11,10 +14,9 @@ async function createJetton() {
   const wallet = await getWalletContract(client, keyPair.publicKey);
 
   const senderAddress = wallet.address;
-  const destinationAddress = Address.parse('0QDb3axXrinnvA2TKJrnOMLjvrh28aIoq6YSpIqyOUAMQrDM'); // Replace with the actual recipient address
-  const jettonMasterAddress = Address.parse('EQCS26P5WyHZ4gzuYnb4yDOvFOSFG1A1VZMi79w51uEBB823'); // USDt jetton master contract
-  // Define jetton transfer amount in the smallest jetton units (1 USDt)
-  const jettonAmount = toNano(10_000);
+  const destinationAddress = Address.parse('0QDb3axXrinnvA2TKJrnOMLjvrh28aIoq6YSpIqyOUAMQrDM');
+  const jettonMasterAddress = Address.parse('EQCS26P5WyHZ4gzuYnb4yDOvFOSFG1A1VZMi79w51uEBB823');
+  const jettonAmount = toNano(100);
   // Base gas fee required for the jetton transfer
   const BASE_JETTON_SEND_AMOUNT = toNano(0.05);
 
@@ -37,8 +39,8 @@ async function createJetton() {
 
   // Get the current seqno (sequence number) for the wallet transaction
   let seqno: number = await wallet.getSeqno();
-  // Send the transfer transaction
-  await wallet.sendTransfer({
+
+  const transfer = await wallet.createTransfer({
     seqno, // Required to ensure transaction uniqueness
     secretKey: keyPair.secretKey, // Sign the transaction with the private key
     sendMode: SendMode.PAY_GAS_SEPARATELY, // Specify send mode
@@ -50,6 +52,16 @@ async function createJetton() {
       })
     ]
   });
+
+  await wallet.send(transfer);
+
+  await delay(10000);
+
+  const extMessage = external({
+    to: wallet.address,
+    body: transfer
+  });
+  await getTransactionDetails(ta, extMessage);
 }
 
 createJetton().catch(console.error);
