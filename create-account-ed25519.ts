@@ -1,5 +1,5 @@
 import { mnemonicNew, mnemonicToSeed, getED25519MasterKeyFromSeed, deriveED25519HardenedKey, keyPairFromSeed, mnemonicToPrivateKey } from '@ton/crypto';
-import { WalletContractV5R1 } from '@ton/ton';
+import { Address, WalletContractV5R1 } from '@ton/ton';
 import { getClient } from './utils/get-client';
 import { getWalletContract } from './utils/get-wallet';
 
@@ -28,7 +28,7 @@ async function generateKeyPairFromSeed(seeds: string[]) {
     });
 
     console.log("Master wallet: ", {
-        derivationPath: `m/44'/607'/0'/0/${0}`,
+        rawAddress: wallet.address.toRawString(),
         publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
         privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
         testnetAddress,
