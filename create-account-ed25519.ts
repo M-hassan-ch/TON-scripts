@@ -1,7 +1,9 @@
-import { mnemonicNew, mnemonicToSeed, getED25519MasterKeyFromSeed, deriveED25519HardenedKey, keyPairFromSeed, mnemonicToPrivateKey } from '@ton/crypto';
+import { mnemonicNew, mnemonicToSeed, getED25519MasterKeyFromSeed, deriveED25519HardenedKey, keyPairFromSeed, mnemonicToPrivateKey, keyPairFromSecretKey } from '@ton/crypto';
 import { Address, WalletContractV5R1 } from '@ton/ton';
 import { getClient } from './utils/get-client';
 import { getWalletContract } from './utils/get-wallet';
+import { encodeSecretKeyToBase64 } from './utils/encode';
+import { decodeBase64ToSecretKey } from './utils/decode';
 
 interface WalletDetails {
     derivationPath: string;
@@ -29,8 +31,33 @@ async function generateKeyPairFromSeed(seeds: string[]) {
 
     console.log("Master wallet: ", {
         rawAddress: wallet.address.toRawString(),
-        publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
-        privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
+        // publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
+        // privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
+        testnetAddress,
+        mainnetAddress
+    }, '\n');
+    return keyPair;
+}
+
+async function generateKeyPairFromSecretKey(base64SecretKey: string) {
+    const rawSecretKey = decodeBase64ToSecretKey(base64SecretKey);
+    let keyPair = keyPairFromSecretKey(rawSecretKey);
+    let wallet = await getWalletContract(client, keyPair.publicKey);
+
+    const testnetAddress = wallet.address?.toString({
+        testOnly: true,
+        bounceable: false
+    });
+
+    const mainnetAddress = wallet.address.toString({
+        testOnly: false,
+        bounceable: false
+    });
+
+    console.log("Master wallet: ", {
+        rawAddress: wallet.address.toRawString(),
+        // publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
+        // privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
         testnetAddress,
         mainnetAddress
     }, '\n');
@@ -41,12 +68,14 @@ async function createTonkeeperWallets(count: number = 3): Promise<{ mnemonic: st
     try {
         // const mnemonic = await mnemonicNew(24);
         const mnemonic = 'upset until follow capital breeze hope wink suit spell joy desert slender round diagram sun fiscal adapt decade finger century wrap example riot usual'.split(' ');
+        const secretKey = 'ZsmkEXGXvBY9ttPI15rhpRlqkS6tbHxhDxRR6+SrWxxqxqCQcfHZZSI5YvQMPMdUH9Sv+Bh/i/ZvXD4K47DGEw==';
         const mnemonicString = mnemonic.join(' ');
         const seed = await mnemonicToSeed(mnemonic, "mnemonic");
         const masterKey = await getED25519MasterKeyFromSeed(seed);
         const wallets: WalletDetails[] = [];
 
         await generateKeyPairFromSeed(mnemonic);
+        await generateKeyPairFromSecretKey(secretKey);
 
         for (let index = 0; index < count; index++) {
             const derivedKey = await deriveED25519HardenedKey(masterKey, index);
