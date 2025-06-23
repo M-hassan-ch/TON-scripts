@@ -2,8 +2,8 @@ import { mnemonicNew, mnemonicToSeed, getED25519MasterKeyFromSeed, deriveED25519
 import { Address, WalletContractV5R1 } from '@ton/ton';
 import { getClient } from './utils/get-client';
 import { getWalletContract } from './utils/get-wallet';
-import { encodeSecretKeyToBase64 } from './utils/encode';
-import { decodeBase64ToSecretKey } from './utils/decode';
+import { encode } from './utils/encode';
+import { decode } from './utils/decode';
 
 interface WalletDetails {
     derivationPath: string;
@@ -40,7 +40,7 @@ async function generateKeyPairFromSeed(seeds: string[]) {
 }
 
 async function generateKeyPairFromSecretKey(base64SecretKey: string) {
-    const rawSecretKey = decodeBase64ToSecretKey(base64SecretKey);
+    const rawSecretKey = decode(base64SecretKey);
     let keyPair = keyPairFromSecretKey(rawSecretKey);
     let wallet = await getWalletContract(client, keyPair.publicKey);
 
@@ -64,7 +64,7 @@ async function generateKeyPairFromSecretKey(base64SecretKey: string) {
     return keyPair;
 }
 
-async function createTonkeeperWallets(count: number = 3): Promise<{ mnemonic: string; wallets: WalletDetails[] }> {
+async function createTonkeeperWallets(count: number = 0): Promise<{ mnemonic: string; wallets: WalletDetails[] }> {
     try {
         // const mnemonic = await mnemonicNew(24);
         const mnemonic = 'upset until follow capital breeze hope wink suit spell joy desert slender round diagram sun fiscal adapt decade finger century wrap example riot usual'.split(' ');
@@ -119,7 +119,7 @@ async function createTonkeeperWallets(count: number = 3): Promise<{ mnemonic: st
 
 async function main() {
     try {
-        const { mnemonic, wallets } = await createTonkeeperWallets(1);
+        const { mnemonic, wallets } = await createTonkeeperWallets();
 
         console.log('Generated Mnemonic:', mnemonic);
         console.log('Generated Wallets:');
